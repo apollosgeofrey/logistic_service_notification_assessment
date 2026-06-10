@@ -13,7 +13,14 @@ return new class extends Migration
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('subscriber_id')->constrained()->onDelete('cascade');
+            $table->enum('channel', ['email','sms']);
+            $table->text('content');
+            $table->enum('priority', ['critical','default','marketing'])->default('default');
+            $table->enum('status', ['queued','sent','delivered','discarded'])->default('queued');
+            $table->timestamp('sent_at')->nullable();
+            $table->timestamp('delivered_at')->nullable();
+            $table->string('external_id')->nullable(); // for tracking in real provider
         });
     }
 
