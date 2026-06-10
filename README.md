@@ -98,10 +98,9 @@ composer dev
 
 ## API Documentation
 
-- **OpenAPI spec:** [docs/openapi.yaml](docs/openapi.yaml) — also served at http://localhost:8000/docs/openapi.yaml
 - **Postman collection:** [postman/notification-service.postman_collection.json](postman/notification-service.postman_collection.json)
 
-Import the OpenAPI file into [Swagger Editor](https://editor.swagger.io) or import the Postman collection directly.
+Import the collection into Postman: **File → Import → select the JSON file**.
 
 ### Endpoints
 
@@ -220,7 +219,6 @@ app/
   Services/NotificationService.php
   Services/Providers/MockEmailProvider.php
   Services/Providers/MockSmsProvider.php
-docs/openapi.yaml
 postman/notification-service.postman_collection.json
 docker-compose.yml
 Dockerfile
@@ -232,6 +230,29 @@ tests/Feature/NotificationTest.php
 ```bash
 curl http://localhost:8000/up
 ```
+
+## Docker build troubleshooting
+
+If `docker compose up --build` fails with `TLS handshake timeout` when pulling from Docker Hub:
+
+1. **Pre-pull the PHP image** when your connection is stable (only one image is required now):
+   ```bash
+   docker pull php:8.3-cli
+   docker compose up --build
+   ```
+
+2. **Retry** after restarting Docker: `sudo systemctl restart docker`
+
+3. **Try a VPN** or different network if Docker Hub is slow or blocked in your region.
+
+4. **Run locally without Docker** until the image pull succeeds:
+   ```bash
+   composer install
+   php artisan migrate && php artisan db:seed
+   php artisan serve
+   # second terminal:
+   php artisan queue:work redis --queue=notifications.critical,notifications.default,notifications.marketing --tries=3
+   ```
 
 ## License
 

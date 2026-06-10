@@ -37,7 +37,6 @@ services:
         condition: service_healthy
     volumes:
       - .:/var/www/html
-      - vendor_data:/var/www/html/vendor
 
   worker:
     build: .
@@ -62,7 +61,6 @@ services:
       - --timeout=90
     volumes:
       - .:/var/www/html
-      - vendor_data:/var/www/html/vendor
     restart: unless-stopped
 
   pgsql:
@@ -107,4 +105,3 @@ services:
 
 volumes:
   pgdata:
-  vendor_data:

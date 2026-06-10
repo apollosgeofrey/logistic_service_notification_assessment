@@ -23,9 +23,6 @@
             <a href="https://github.com/apollosgeofrey" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow transition">
                 GitHub
             </a>
-            <a href="/docs/openapi.yaml" class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg shadow transition">
-                OpenAPI Spec
-            </a>
         </div>
     </section>
 
@@ -51,7 +48,7 @@
                 <ul class="list-disc list-inside">
                     <li>PHP 8.3, Laravel 13</li>
                     <li>3 REST endpoints under <code class="bg-white px-1 rounded">/api/v1</code></li>
-                    <li>OpenAPI spec + Postman collection</li>
+                    <li>Postman API collection</li>
                 </ul>
             </div>
             <div>
