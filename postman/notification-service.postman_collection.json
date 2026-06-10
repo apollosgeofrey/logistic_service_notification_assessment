@@ -1,0 +1,84 @@
+{
+  "info": {
+    "name": "Notification Service API",
+    "description": "Bulk SMS/Email notification microservice — Laravel assessment project.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1"
+    },
+    {
+      "key": "idempotencyKey",
+      "value": "{{$guid}}"
+    }
+  ],
+  "item": [
+    {
+      "name": "Bulk send — critical email",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{idempotencyKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"channel\": \"email\",\n  \"content\": \"Your verification code is 1234\",\n  \"priority\": \"critical\",\n  \"subscriber_ids\": [1]\n}"
+        },
+        "url": "{{baseUrl}}/notifications/bulk-send"
+      }
+    },
+    {
+      "name": "Bulk send — marketing SMS",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{$guid}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"channel\": \"sms\",\n  \"content\": \"Summer sale starts today!\",\n  \"priority\": \"marketing\",\n  \"subscriber_ids\": [2]\n}"
+        },
+        "url": "{{baseUrl}}/notifications/bulk-send"
+      }
+    },
+    {
+      "name": "Get notification status",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/notifications/1"
+      }
+    },
+    {
+      "name": "List subscriber notifications",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/subscribers/1/notifications?status=delivered&channel=email&per_page=15",
+          "host": ["{{baseUrl}}"],
+          "path": ["subscribers", "1", "notifications"],
+          "query": [
+            { "key": "status", "value": "delivered" },
+            { "key": "channel", "value": "email" },
+            { "key": "per_page", "value": "15" }
+          ]
+        }
+      }
+    }
+  ]
+}

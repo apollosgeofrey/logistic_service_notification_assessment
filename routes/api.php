@@ -1,7 +1,7 @@
 <?php
 
+use App\Http\Controllers\API\NotificationController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +18,3 @@ Route::prefix('v1')->group(function () {
     Route::get('/notifications/{id}', [NotificationController::class, 'notificationStatus']);
     Route::get('/subscribers/{id}/notifications', [NotificationController::class, 'subscriberNotifications']);
 });
-
-
-

@@ -1,4 +1,26 @@
-version: '3.8'
+x-app-environment: &app-environment
+  APP_NAME: Notification Service
+  APP_ENV: local
+  APP_KEY: ${APP_KEY:-base64:GdLBggiR7JLcy9lZnrGwJdmlqc1OJjXJeCPYhvGZ/sA=}
+  APP_DEBUG: "true"
+  APP_URL: http://localhost:8000
+  LOG_CHANNEL: stack
+  LOG_LEVEL: debug
+  DB_CONNECTION: pgsql
+  DB_HOST: pgsql
+  DB_PORT: 5432
+  DB_DATABASE: notification_service_db
+  DB_USERNAME: postgres
+  DB_PASSWORD: Password@123
+  REDIS_CLIENT: predis
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  QUEUE_CONNECTION: redis
+  CACHE_STORE: redis
+  SESSION_DRIVER: file
+  IDEMPOTENCY_TTL: 86400
+  MOCK_FORCE_TRANSIENT_FAILURE: "false"
+  MOCK_FORCE_PERMANENT_FAILURE: "false"
 
 services:
   app:
@@ -7,17 +29,45 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DB_HOST=pgsql
-      - REDIS_HOST=redis
-      - QUEUE_CONNECTION=redis
+      <<: *app-environment
     depends_on:
-      - pgsql
-      - redis
+      pgsql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - .:/var/www/html
+      - vendor_data:/var/www/html/vendor
+
+  worker:
+    build: .
+    container_name: notification_worker
+    environment:
+      <<: *app-environment
+    depends_on:
+      pgsql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      app:
+        condition: service_started
+    command:
+      - php
+      - artisan
+      - queue:work
+      - redis
+      - --queue=notifications.critical,notifications.default,notifications.marketing
+      - --tries=3
+      - --sleep=1
+      - --timeout=90
+    volumes:
+      - .:/var/www/html
+      - vendor_data:/var/www/html/vendor
+    restart: unless-stopped
 
   pgsql:
     image: postgres:15
+    container_name: notification_pgsql
     environment:
       POSTGRES_DB: notification_service_db
       POSTGRES_USER: postgres
@@ -26,17 +76,35 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d notification_service_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   redis:
-    image: redis:7
+    image: redis:7-alpine
+    container_name: notification_redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: notification_rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
 
 volumes:
   pgdata:
+  vendor_data:
