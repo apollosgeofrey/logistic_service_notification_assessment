@@ -11,6 +11,7 @@ if [ ! -f vendor/autoload.php ]; then
     /usr/local/bin/composer install --no-interaction --prefer-dist --no-progress
 fi
 
+php artisan config:clear --ansi
 php artisan migrate --force
 php artisan db:seed --force
 
